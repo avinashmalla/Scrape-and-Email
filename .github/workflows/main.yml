@@ -1,12 +1,25 @@
 name: send email
 
+# on:
+#   schedule:
+#     - cron: "0 11 * * *"
+
 on:
-  schedule:
-    - cron: "0 11 * * *"
+  # Trigger the workflow on push or pull request but only for the main branch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MAIL_USER: ${{secrets.MAIL_USER}}
+      MAIL_PASS: ${{secrets.MAIL_PASS}}
 
     steps:
       - uses: actions/checkout@v2
@@ -17,6 +30,6 @@ jobs:
       - name: Install dependencies and send email
         run: |
           python -m pip install --upgrade pip
-          pip install pipenv 
+          pip install pipenv
           pipenv install
           pipenv run python src/scrape.py
