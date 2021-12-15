@@ -3,7 +3,7 @@ name: Scrape and send email
 # Executes at 11 AM everyday
 on:
   schedule:
-    - cron: "45 13 * * 1-5"
+    - cron: 45 13 * * 1-5
 
 jobs:
   build:
