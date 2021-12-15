@@ -11,6 +11,7 @@ import datetime as dt
 
 
 def get_updates():
+
     URL = "https://www.ouka.fi/oulu/villavictor/ajankohtaista"
     # request the URL and parse the JSON
     page = requests.get(URL)
@@ -22,18 +23,19 @@ def get_updates():
     dateSpan = soup.find_all(
         'span', {'class': 'metadata-entry metadata-publish-date'})
     publish_date_txt = [span.get_text().strip() for span in dateSpan]
-    publish_date = [dt.datetime.strptime(
+    publishDate = [dt.datetime.strptime(
         dtm, '%d.%m.%Y').date() for dtm in publish_date_txt]
 
-    #Extraction and Clean up of posts
+    #Extraction and Clean up of posts and link
     postSpan = soup.find_all('header', {'class': 'ouka-ap-title-list-title'})
     posts = [span.get_text().strip() for span in postSpan]
+    links = [x.find('a', href=True)['href'] for x in postSpan]
 
-    df = pd.DataFrame(list(zip(publish_date, posts)),
-                      columns=['publishDate', 'Posts'])
-    # The df is now ready
+    df = pd.DataFrame(list(zip(publishDate, posts, links)),
+                      columns=['publishDate', 'Posts', 'Links'])
 
-    # df = df.append({'publishDate':dt.date.today(),'Posts':'Class cancelled for Alkeisf 1'}, ignore_index = True)
+    # dummy row for testing
+    # df = df.append({'publishDate': dt.date.today(),'Posts': posts[0]+" Alkeis 1", 'Links': links[0]}, ignore_index=True)
 
     # Extracting the posts that were published today
     df = df.loc[df.publishDate == dt.date.today()]
@@ -43,15 +45,20 @@ def get_updates():
     if len(df) != 0:
         for i in range(len(df)):
             title = df['Posts'][i].lower()
-            return(any(x in title for x in matches))
-            #### CREATE A PACKET ALONG WITH THE RESULT
+            # return(any(x in title for x in matches))
+            yesNo = any(x in title for x in matches)
+            if yesNo == 1:
+                return (title, df['Links'][i])
+            else:
+                return 0
     else:
         return(-1)
 
 
 sender_email = os.environ['MAIL_USER']
-receiver_email = "malla.avi@gmail.com"
 password = os.environ['MAIL_PASS']
+
+receiver_email = "malla.avi@gmail.com"
 receiver_list = ['malla_avi@hotmail.com', 'malla.avi@gmail.com']
 
 msg = MIMEMultipart()
@@ -63,17 +70,37 @@ latestUpdate = get_updates()
 if latestUpdate == -1:
     msg['To'] = receiver_email
     msg['Subject'] = 'No new posts today'
-    body = 'The page does not have any new posts. Enjoy your day.'
-elif latestUpdate == 1:
-    msg['To'] = ','.join(receiver_list)
-    msg['Subject'] = 'New Post on Villa Victor'
-    body = 'Hello!! A new update has been posted on Villa Victor Website about Alkeis 1 course. Please check the website https://www.ouka.fi/oulu/villavictor/ajankohtaista'
+    html = """\
+    <html>
+      <body>
+        <p>Hello!!<br>
+           The page does not have any new posts. Enjoy your day.<br>
+        </p>
+      </body>
+    </html>
+    """
 elif latestUpdate == 0:
     msg['To'] = receiver_email
     msg['Subject'] = 'Nothing important to report today'
-    body = 'Hello!! New post but NOT about Alkeis 1'
+    html = 'Hello!! New post but NOT about Alkeis 1'
+else:
+    postTitle = latestUpdate[0].title()
+    postLink = latestUpdate[1]
+    # msg['To'] = ','.join(receiver_list)
+    msg['To'] = receiver_email
+    msg['Subject'] = 'New Post on Villa Victor'
+    html = """\
+    <html>
+      <body>
+        <p>Hello!!<br>
+           A new update has been posted on Villa Victor Website about Alkeis 1 course.<br>
+           <a href = "{postLink}">{postTitle}</a>
+        </p>
+      </body>
+    </html>
+    """.format(**locals())
 
-msg_content = MIMEText(body, 'plain', 'utf-8')
+msg_content = MIMEText(html, 'html')
 msg.attach(msg_content)
 
 # Create secure connection with server and send email
