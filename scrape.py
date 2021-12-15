@@ -26,7 +26,7 @@ def get_updates():
     publishDate = [dt.datetime.strptime(
         dtm, '%d.%m.%Y').date() for dtm in publish_date_txt]
 
-    #Extraction and Clean up of posts
+    #Extraction and Clean up of posts and link
     postSpan = soup.find_all('header', {'class': 'ouka-ap-title-list-title'})
     posts = [span.get_text().strip() for span in postSpan]
     links = [x.find('a', href=True)['href'] for x in postSpan]
@@ -35,8 +35,7 @@ def get_updates():
                       columns=['publishDate', 'Posts', 'Links'])
 
     # dummy row for testing
-    df = df.append({'publishDate': dt.date.today(),
-                   'Posts': posts[0]+" Alkeis 1", 'Links': links[0]}, ignore_index=True)
+    # df = df.append({'publishDate': dt.date.today(),'Posts': posts[0]+" Alkeis 1", 'Links': links[0]}, ignore_index=True)
 
     # Extracting the posts that were published today
     df = df.loc[df.publishDate == dt.date.today()]
@@ -55,6 +54,7 @@ def get_updates():
     else:
         return(-1)
 
+
 sender_email = os.environ['MAIL_USER']
 password = os.environ['MAIL_PASS']
 
@@ -66,7 +66,6 @@ msg['From'] = sender_email
 
 # check for updates on the website
 latestUpdate = get_updates()
-
 
 if latestUpdate == -1:
     msg['To'] = receiver_email
@@ -87,7 +86,8 @@ elif latestUpdate == 0:
 else:
     postTitle = latestUpdate[0].title()
     postLink = latestUpdate[1]
-    msg['To'] = ','.join(receiver_list)
+    # msg['To'] = ','.join(receiver_list)
+    msg['To'] = receiver_email
     msg['Subject'] = 'New Post on Villa Victor'
     html = """\
     <html>
