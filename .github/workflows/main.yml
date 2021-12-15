@@ -1,9 +1,8 @@
 name: Scrape and send email
 
-
+# Executes at 11 AM everyday
 on:
   schedule:
-    # Executes at 11 AM everyday
     - cron: "36 13 * * *"
 
 jobs:
