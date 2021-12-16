@@ -1,17 +1,16 @@
 name: Scrape and send email
 
-# Executes at 9 AM everyday
-# on:
-#   schedule:
-#     - cron: '0 9 * * 1-5'
-
-# Controls when the workflow will run
+# Executes at 9 AM every weekday
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  schedule:
+    - cron: '0 9 * * 1-5'
+
+# on:
+#   # Triggers the workflow on push or pull request events but only for the main branch
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
 jobs:
   build:
