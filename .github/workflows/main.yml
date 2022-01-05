@@ -4,6 +4,7 @@ name: Scrape and send email
 on:
   schedule:
     - cron: '0 9 * * 1-5'
+  workflow-dispatch:
 
 # on:
 #   # Triggers the workflow on push or pull request events but only for the main branch
