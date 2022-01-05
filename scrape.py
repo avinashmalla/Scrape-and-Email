@@ -1,6 +1,5 @@
 import ssl
 import smtplib
-from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
@@ -19,14 +18,14 @@ def get_updates():
 
     soup = BeautifulSoup(page.content, "html.parser")
 
-    #Extraction, Clean up and Date formatting
+    # Extraction, Clean up and Date formatting
     dateSpan = soup.find_all(
         'span', {'class': 'metadata-entry metadata-publish-date'})
     publish_date_txt = [span.get_text().strip() for span in dateSpan]
     publishDate = [dt.datetime.strptime(
         dtm, '%d.%m.%Y').date() for dtm in publish_date_txt]
 
-    #Extraction and Clean up of posts and link
+    # Extraction and Clean up of posts and link
     postSpan = soup.find_all('header', {'class': 'ouka-ap-title-list-title'})
     posts = [span.get_text().strip() for span in postSpan]
     links = [x.find('a', href=True)['href'] for x in postSpan]
@@ -58,8 +57,8 @@ def get_updates():
 sender_email = os.environ['MAIL_USER']
 password = os.environ['MAIL_PASS']
 
-receiver_email = "malla.avi@gmail.com"
-receiver_list = ['malla_avi@hotmail.com', 'malla.avi@gmail.com']
+receiver_email = sender_email  # I'm sending it to myself
+# receiver_list = ['email_1@email.com', 'email_2@gmail.com', email_3@mail.com]
 
 msg = MIMEMultipart()
 msg['From'] = sender_email
@@ -86,7 +85,7 @@ elif latestUpdate == 0:
 else:
     postTitle = latestUpdate[0].title()
     postLink = latestUpdate[1]
-    # msg['To'] = ','.join(receiver_list)
+    # msg['To'] = ','.join(receiver_list) # To send to multiple
     msg['To'] = receiver_email
     msg['Subject'] = 'New Post on Villa Victor'
     html = """\
