@@ -1,9 +1,9 @@
 name: Scrape and send email
 
-# Executes at 10 AM every weekday
+# Executes at 8AM UTC (10AM Finnish time) every weekday
 on:
   schedule:
-    - cron: '0 10 * * 1-5'
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:
 
 # on:
