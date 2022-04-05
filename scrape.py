@@ -36,7 +36,7 @@ def get_updates():
     df = df.loc[df.publish_date == dt.date.today()]
     df.reset_index(drop=True, inplace=True)
 
-    matches = ["alkeis1", "alkeis 1"]
+    matches = ["alkeis1", "alkeis 1", "alkeiskurssi 1"]
     if len(df) != 0:
         for i in range(len(df)):
             title = df['Posts'][i].lower()
